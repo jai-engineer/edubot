@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+import re
 
 st.set_page_config(page_title="EduBot: Interactive Learning Lab", layout="wide", page_icon="🚀")
 
@@ -121,16 +122,15 @@ elif st.session_state.page == "chat_interface":
             st.markdown(user_prompt)
         st.session_state.messages.append({"role": "user", "content": user_prompt})
 
-        # Process response locally with conditional dialogue matching
+        # Process response locally
         with st.chat_message("assistant"):
             with st.spinner("Analyzing data vectors..."):
                 import time
                 time.sleep(1.2)
                 
-                # Standardize input for checking rules
                 clean_prompt = user_prompt.lower().strip("?.! ")
                 
-                # RULE 1: Greetings Match
+                # --- CHAT & GREETINGS DETECTOR ---
                 if clean_prompt in ["hi", "hii", "hello", "hey", "greetings"]:
                     if language == "Hindi (हिंदी)":
                         ans = "नमस्ते! मैं आपका एआई लर्निंग लैब गाइड हूँ। आप मुझसे कोई भी सवाल पूछ सकते हैं।"
@@ -141,8 +141,7 @@ elif st.session_state.page == "chat_interface":
                     else:
                         ans = "Hello! Welcome to the Interactive Learning Lab. I am your specialized AI tutor. How can I help you today?"
                 
-                # RULE 2: "How are you?" Match
-                elif any(phrase in clean_prompt for phrase in ["how are you", "how r u", "how are you doing", "kaise ho"]):
+                elif any(phrase in clean_prompt for phrase in ["how are you", "how r u", "kaise ho"]):
                     if language == "Hindi (हिंदी)":
                         ans = "मैं बिल्कुल ठीक हूँ, धन्यवाद! आपकी पढ़ाई में आज मैं आपकी क्या मदद कर सकता हूँ?"
                     elif language == "Punjabi (ਪੰਜਾਬੀ)":
@@ -152,8 +151,7 @@ elif st.session_state.page == "chat_interface":
                     else:
                         ans = "I am operating at peak efficiency, thank you! Ready to assist you with conceptual explanations, vision analysis, or test preparation."
                 
-                # RULE 3: "What/Who are you?" Match
-                elif any(phrase in clean_prompt for phrase in ["what are you", "who are you", "your name", "tum kaun ho"]):
+                elif any(phrase in clean_prompt for phrase in ["what are you", "who are you", "tum kaun ho"]):
                     if language == "Hindi (हिंदी)":
                         ans = "मैं **EduBot Pro** हूँ, एक आधुनिक विज़न-आधारित एआई ट्यूटर जो जटिल समीकरणों और धारणाओं को आसानी से समझाने के लिए बनाया गया है।"
                     elif language == "Punjabi (ਪੰਜਾਬੀ)":
@@ -162,32 +160,38 @@ elif st.session_state.page == "chat_interface":
                         ans = "Mera naam **EduBot Pro** hai. Main ek next-generation AI Vision Tutor assistant hoon jo aapko math complex explanations sikhane me help karta hoon."
                     else:
                         ans = "I am **EduBot Pro**, an exhibition-grade Intelligent Vision Tutor designed for next-gen interactive learning and concept mapping."
-                
-                # FALLBACK RULE: If it's a math query, run the standard math simulation
+
+                # --- DYNAMIC QUESTION PROCESSING ENGINE ---
                 else:
+                    # Clean up input text to find the main subject matter
+                    display_topic = user_prompt.replace("solve", "").replace("Solve", "").replace("what is", "").replace("What is", "").strip("?.! ")
+                    if not display_topic:
+                        display_topic = "your query"
+
+                    # Look for any numbers or math symbols in their input to customize equations
+                    math_numbers = re.findall(r'\d+', clean_prompt)
+                    num1 = math_numbers[0] if len(math_numbers) > 0 else "5"
+                    num2 = math_numbers[1] if len(math_numbers) > 1 else "2"
+                    
                     if learning_mode:
                         if language == "Hindi (हिंदी)":
                             ans = (
-                                "### 📚 **ट्यूटोरियल गाइड: द्विघात बहुपद (Quadratic Polynomial)**\n\n"
-                                "**चरण 1:** दिए गए बहुपद $f(x) = x^2 + x - 2$ के गुणांकों (coefficients) की तुलना $ax^2 + bx + c$ से करें।\n"
-                                "यहाँ, $a = 1, b = 1, c = -2$ है।\n\n"
-                                "**चरण 2:** मूलों का योग सूत्र लागू करें: $\\alpha + \\beta = -b/a = -1/1 = -1$।\n"
-                                "मूलों का गुणनफल सूत्र लागू करें: $\\alpha\\beta = c/a = -2/1 = -2$।\n\n"
-                                "**💡 संकेत (Hint):** व्यंजक $\\frac{1}{\\alpha} - \\frac{1}{\\beta}$ को $\\frac{\\beta - \\alpha}{\\alpha\\beta}$ के रूप में लिखा जा सकता है। "
-                                "बीजगणितीय पहचान $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta$ का उपयोग करके मान ज्ञात करें और अंतिम विभाजन स्वयं हल करें!"
+                                f"### 📚 **ट्यूटोरियल गाइड: {display_topic}**\n\n"
+                                f"**चरण 1:** दिए गए विषय या समीकरण `{display_topic}` के मुख्य मानों और अवधारणाओं की पहचान करें।\n\n"
+                                f"**चरण 2:** समस्या को सरल भागों में विभाजित करें। मुख्य आधार मानों की जाँच करें (उदाहरण: $a = {num1}, b = {num2}$)।\n\n"
+                                f"**💡 संकेत (Hint):** सीधे उत्तर पर जाने के बजाय, बुनियादी सूत्रों का उपयोग करके संबंधों को हल करने का प्रयास करें। "
+                                f"क्या आप आगे के चरणों की गणना स्वयं कर सकते हैं?"
                             )
-                        else:
+                        elif language == "Punjabi (ਪੰਜਾਬੀ)":
                             ans = (
-                                "### 📚 **Tutorial Guide: Quadratic Polynomials**\n\n"
-                                "**Step 1:** Formulate your coefficient matrix from $f(x) = x^2 + x - 2$. Here, $a = 1, b = 1, c = -2$.\n\n"
-                                "**Step 2:** Calculate Sum ($\\alpha + \\beta = -b/a = -1$) and Product ($\\alpha\\beta = c/a = -2$).\n\n"
-                                "**💡 Hint:** Rewrite the required expression $\\frac{1}{\\alpha} - \\frac{1}{\\beta}$ into $\\frac{\\beta - \\alpha}{\\alpha\\beta}$. "
-                                "Use the algebraic identity $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta$ to plug in the values and solve the final fractions!"
+                                f"### 📚 **ਟਿਊਟੋਰਿਅਲ ਗਾਈਡ: {display_topic}**\n\n"
+                                f"**ਕਦਮ 1:** ਦਿੱਤੇ ਗਏ ਵਿਸ਼ੇ ਜਾਂ ਸਮੀਕਰਨ `{display_topic}` ਦੇ ਮੁੱਖ ਮੁੱਲਾਂ ਅਤੇ ਸੰਕਲਪਾਂ ਦੀ ਪਛਾਣ ਕਰੋ।\n\n"
+                                f"**ਕਦਮ 2:** ਸਮੱਸਿਆ ਨੂੰ ਸਰਲ ਭਾਗਾਂ ਵਿੱਚ ਵੰਡੋ। ਮੁੱਖ ਅਧਾਰ ਮੁੱਲਾਂ ਦੀ ਜਾਂਚ ਕਰੋ (ਉਦਾਹਰਣ: $a = {num1}, b = {num2}$)।\n\n"
+                                f"**💡 ਇਸ਼ਾਰਾ (Hint):** ਸਿੱਧੇ ਜਵਾਬ 'ਤੇ ਜਾਣ ਦੀ ਬਜਾਏ, ਬੁਨਿਆਦੀ ਫਾਰਮੂਲਿਆਂ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਸਬੰਧਾਂ ਨੂੰ ਹੱਲ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ। "
+                                f"ਕੀ ਤੁਸੀਂ ਅਗਲੇ ਕਦਮਾਂ ਦੀ ਗਣਨਾ ਖੁਦ ਕਰ ਸਕਦੇ ਹੋ?"
                             )
-                    else:
-                        if language == "Hindi (हिंदी)":
+                        elif language == "Hinglish":
                             ans = (
-                                "### 📝 **पूर्ण समाधान (Complete Solution) - प्रश्न 6**\n\n"
-                                "दिए गए बहुपद के लिए: $\\alpha + \\beta = -1$ और $\\alpha\\beta = -2$ है।\n\n"
-                                "**गणना:**\n"
-                                "$$\\frac{1}{\\alpha} - \\frac{1}{\\beta} = \\frac{\\beta - \\alpha}{\\alpha\\beta}$$\n\n"
+                                f"### 📚 **Tutorial Guide: {display_topic}**\n\n"
+                                f"**Step 1:** Diye gaye topic `{display_topic}` ke core elements aur variables ko closely identify karein.\n\n"
+                                f"**Step 2:** Is topic ke important values ko mathematical structure me fit karein (Jaise: $x = {num1}, y = {num2}$).\n\n"
