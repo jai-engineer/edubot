@@ -131,6 +131,7 @@ elif st.session_state.page == "chat_interface":
                 time.sleep(1.2)
                 
                 clean_prompt = user_prompt.lower().strip("?.! ")
+                ans = ""
                 
                 # --- CHAT & GREETINGS DETECTOR ---
                 if clean_prompt in ["hi", "hii", "hello", "hey", "greetings"]:
@@ -197,4 +198,3 @@ elif st.session_state.page == "chat_interface":
                                 f"**Step 2:** Is topic ke important values ko mathematical structure me fit karein (Jaise: $x = {num1}, y = {num2}$).\n\n"
                                 f"**💡 Hint:** Direct copy-paste karne ke bajaye, variables ke relation ko analyze karein aur step-by-step form use karke calculate karein!"
                             )
-                        else:
