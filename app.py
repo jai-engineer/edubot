@@ -86,7 +86,7 @@ if st.session_state.page == "welcome":
         st.session_state.page = "chat_interface"
         st.rerun()
 
-# MAIN SIMULATED SOLVER INTERFACE
+# MAIN INTERFACE
 elif st.session_state.page == "chat_interface":
     if st.button("⬅️ Return to Main Welcome Page"):
         st.session_state.page = "welcome"
@@ -110,68 +110,84 @@ elif st.session_state.page == "chat_interface":
     if uploaded_file is not None:
         st.sidebar.image(Image.open(uploaded_file), caption="Optical Lens Stream active", use_container_width=True)
 
+    # Display past chat history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
+    # Accept new user prompt
     if user_prompt := st.chat_input("Ask a question, or type 'Analyze upload'"):
         with st.chat_message("user"):
             st.markdown(user_prompt)
         st.session_state.messages.append({"role": "user", "content": user_prompt})
 
-        # Static simulated response for flawless local exhibition presentation
+        # Process response locally with conditional dialogue matching
         with st.chat_message("assistant"):
             with st.spinner("Analyzing data vectors..."):
                 import time
-                time.sleep(1.5)
+                time.sleep(1.2)
                 
-                if learning_mode:
+                # Standardize input for checking rules
+                clean_prompt = user_prompt.lower().strip("?.! ")
+                
+                # RULE 1: Greetings Match
+                if clean_prompt in ["hi", "hii", "hello", "hey", "greetings"]:
                     if language == "Hindi (हिंदी)":
-                        ans = (
-                            "### 📚 **ट्यूटोरियल गाइड: द्विघात बहुपद (Quadratic Polynomial)**\n\n"
-                            "**चरण 1:** दिए गए बहुपद $f(x) = x^2 + x - 2$ के गुणांकों (coefficients) की तुलना $ax^2 + bx + c$ से करें।\n"
-                            "यहाँ, $a = 1, b = 1, c = -2$ है।\n\n"
-                            "**चरण 2:** मूलों का योग सूत्र लागू करें: $\\alpha + \\beta = -b/a = -1/1 = -1$।\n"
-                            "मूलों का गुणनफल सूत्र लागू करें: $\\alpha\\beta = c/a = -2/1 = -2$।\n\n"
-                            "**💡 संकेत (Hint):** व्यंजक $\\frac{1}{\\alpha} - \\frac{1}{\\beta}$ को $\\frac{\\beta - \\alpha}{\\alpha\\beta}$ के रूप में लिखा जा सकता है। "
-                            "बीजगणितीय पहचान $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta$ का उपयोग करके मान ज्ञात करें और अंतिम विभाजन स्वयं हल करें!"
-                        )
+                        ans = "नमस्ते! मैं आपका एआई लर्निंग लैब गाइड हूँ। आप मुझसे कोई भी सवाल पूछ सकते हैं।"
+                    elif language == "Punjabi (ਪੰਜਾਬੀ)":
+                        ans = "ਸਤਿ ਸ਼੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ ਐਲਆਈ ਲਰਨਿੰਗ ਲੈਬ ਗਾਈਡ ਹਾਂ। ਤੁਸੀਂ ਮੇਰੇ ਤੋਂ ਕੋਈ ਵੀ ਸਵਾਲ ਪੁੱਛ ਸਕਦੇ ਹੋ।"
+                    elif language == "Hinglish":
+                        ans = "Hello! Main aapka AI learning assistant hoon. Aap mujhse koi bhi question pooch sakte hain."
                     else:
-                        ans = (
-                            "### 📚 **Tutorial Guide: Quadratic Polynomials**\n\n"
-                            "**Step 1:** Formulate your coefficient matrix from $f(x) = x^2 + x - 2$. Here, $a = 1, b = 1, c = -2$.\n\n"
-                            "**Step 2:** Calculate Sum ($\\alpha + \\beta = -b/a = -1$) and Product ($\\alpha\\beta = c/a = -2$).\n\n"
-                            "**💡 Hint:** Rewrite the required expression $\\frac{1}{\\alpha} - \\frac{1}{\\beta}$ into $\\frac{\\beta - \\alpha}{\\alpha\\beta}$. "
-                            "Use the algebraic identity $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta$ to plug in the values and solve the final fractions!"
-                        )
+                        ans = "Hello! Welcome to the Interactive Learning Lab. I am your specialized AI tutor. How can I help you today?"
+                
+                # RULE 2: "How are you?" Match
+                elif any(phrase in clean_prompt for phrase in ["how are you", "how r u", "how are you doing", "kaise ho"]):
+                    if language == "Hindi (हिंदी)":
+                        ans = "मैं बिल्कुल ठीक हूँ, धन्यवाद! आपकी पढ़ाई में आज मैं आपकी क्या मदद कर सकता हूँ?"
+                    elif language == "Punjabi (ਪੰਜਾਬੀ)":
+                        ans = "ਮੈਂ ਬਿਲਕੁਲ ਠੀਕ ਹਾਂ, ਧੰਨਵਾਦ! ਤੁਹਾਡੀ ਪੜ੍ਹਾਈ ਵਿੱਚ ਅੱਜ ਮੈਂ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?"
+                    elif language == "Hinglish":
+                        ans = "Main ekdum badhiya hoon! Aap batao, aaj aapki studies me kya help chahiye?"
+                    else:
+                        ans = "I am operating at peak efficiency, thank you! Ready to assist you with conceptual explanations, vision analysis, or test preparation."
+                
+                # RULE 3: "What/Who are you?" Match
+                elif any(phrase in clean_prompt for phrase in ["what are you", "who are you", "your name", "tum kaun ho"]):
+                    if language == "Hindi (हिंदी)":
+                        ans = "मैं **EduBot Pro** हूँ, एक आधुनिक विज़न-आधारित एआई ट्यूटर जो जटिल समीकरणों और धारणाओं को आसानी से समझाने के लिए बनाया गया है।"
+                    elif language == "Punjabi (ਪੰਜਾਬੀ)":
+                        ans = "ਮੈਂ **EduBot Pro** ਹਾਂ, ਇੱਕ ਆਧੁਨਿਕ ਵਿਜ਼ਨ-ਅਧਾਰਿਤ ਏਆਈ ਟਿਊਟਰ ਜੋ ਗੁੰਝਲਦਾਰ ਸਵਾਲਾਂ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਸਮਝਾਉਣ ਲਈ ਬਣਾਇਆ ਗਿਆ ਹੈ।"
+                    elif language == "Hinglish":
+                        ans = "Mera naam **EduBot Pro** hai. Main ek next-generation AI Vision Tutor assistant hoon jo aapko math complex explanations sikhane me help karta hoon."
+                    else:
+                        ans = "I am **EduBot Pro**, an exhibition-grade Intelligent Vision Tutor designed for next-gen interactive learning and concept mapping."
+                
+                # FALLBACK RULE: If it's a math query, run the standard math simulation
                 else:
-                    if language == "Hindi (हिंदी)":
-                        ans = (
-                            "### 📝 **पूर्ण समाधान (Complete Solution) - प्रश्न 6**\n\n"
-                            "दिए गए बहुपद के लिए: $\\alpha + \\beta = -1$ और $\\alpha\\beta = -2$ है।\n\n"
-                            "**गणना:**\n"
-                            "$$\\frac{1}{\\alpha} - \\frac{1}{\\beta} = \\frac{\\beta - \\alpha}{\\alpha\\beta}$$\n\n"
-                            "हम जानते हैं कि $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta = (-1)^2 - 4(-2) = 1 + 8 = 9$ है।\n"
-                            "इसलिए, $\\beta - \\alpha = \\pm 3$ है।\n\n"
-                            "**अंतिम उत्तर:** $\\mathbf{\\pm\\frac{3}{2}}$ (या पुस्तक के अनुसार $\\mathbf{-\\frac{3}{2}}$)"
-                        )
+                    if learning_mode:
+                        if language == "Hindi (हिंदी)":
+                            ans = (
+                                "### 📚 **ट्यूटोरियल गाइड: द्विघात बहुपद (Quadratic Polynomial)**\n\n"
+                                "**चरण 1:** दिए गए बहुपद $f(x) = x^2 + x - 2$ के गुणांकों (coefficients) की तुलना $ax^2 + bx + c$ से करें।\n"
+                                "यहाँ, $a = 1, b = 1, c = -2$ है।\n\n"
+                                "**चरण 2:** मूलों का योग सूत्र लागू करें: $\\alpha + \\beta = -b/a = -1/1 = -1$।\n"
+                                "मूलों का गुणनफल सूत्र लागू करें: $\\alpha\\beta = c/a = -2/1 = -2$।\n\n"
+                                "**💡 संकेत (Hint):** व्यंजक $\\frac{1}{\\alpha} - \\frac{1}{\\beta}$ को $\\frac{\\beta - \\alpha}{\\alpha\\beta}$ के रूप में लिखा जा सकता है। "
+                                "बीजगणितीय पहचान $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta$ का उपयोग करके मान ज्ञात करें और अंतिम विभाजन स्वयं हल करें!"
+                            )
+                        else:
+                            ans = (
+                                "### 📚 **Tutorial Guide: Quadratic Polynomials**\n\n"
+                                "**Step 1:** Formulate your coefficient matrix from $f(x) = x^2 + x - 2$. Here, $a = 1, b = 1, c = -2$.\n\n"
+                                "**Step 2:** Calculate Sum ($\\alpha + \\beta = -b/a = -1$) and Product ($\\alpha\\beta = c/a = -2$).\n\n"
+                                "**💡 Hint:** Rewrite the required expression $\\frac{1}{\\alpha} - \\frac{1}{\\beta}$ into $\\frac{\\beta - \\alpha}{\\alpha\\beta}$. "
+                                "Use the algebraic identity $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta$ to plug in the values and solve the final fractions!"
+                            )
                     else:
-                        ans = (
-                            "### 📝 **Step-by-Step Solution - Question 6**\n\n"
-                            "For the given polynomial: $\\alpha + \\beta = -1$ and $\\alpha\\beta = -2$.\n\n"
-                            "**Calculation:**\n"
-                            "$$\\frac{1}{\\alpha} - \\frac{1}{\\beta} = \\frac{\\beta - \\alpha}{\\alpha\\beta}$$\n\n"
-                            "Using identity: $(\\beta - \\alpha)^2 = (\\alpha + \\beta)^2 - 4\\alpha\\beta = (-1)^2 - 4(-2) = 9$.\n"
-                            "Therefore, $\\beta - \\alpha = \\pm 3$.\n\n"
-                            "**Final Answer:** $\\mathbf{\\pm\\frac{3}{2}}$"
-                        )
-                
-                if generate_practice:
-                    ans += (
-                        "\n\n---\n### 🎯 **Practice Challenge**\n"
-                        "If $\\alpha$ and $\\beta$ are the zeros of the quadratic polynomial $f(x) = x^2 + 2x - 3$, "
-                        "find the value of $\\frac{1}{\\alpha} - \\frac{1}{\\beta}$ without using a calculator."
-                    )
-                
-                st.markdown(ans)
-                st.session_state.messages.append({"role": "assistant", "content": ans})
+                        if language == "Hindi (हिंदी)":
+                            ans = (
+                                "### 📝 **पूर्ण समाधान (Complete Solution) - प्रश्न 6**\n\n"
+                                "दिए गए बहुपद के लिए: $\\alpha + \\beta = -1$ और $\\alpha\\beta = -2$ है।\n\n"
+                                "**गणना:**\n"
+                                "$$\\frac{1}{\\alpha} - \\frac{1}{\\beta} = \\frac{\\beta - \\alpha}{\\alpha\\beta}$$\n\n"
