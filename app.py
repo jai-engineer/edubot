@@ -117,7 +117,9 @@ elif st.session_state.page == "chat_interface":
             st.markdown(message["content"])
 
     # Accept new user prompt
-    if user_prompt := st.chat_input("Ask a question, or type 'Analyze upload'"):
+    user_prompt = st.chat_input("Ask a question, or type 'Analyze upload'")
+    
+    if user_prompt:
         with st.chat_message("user"):
             st.markdown(user_prompt)
         st.session_state.messages.append({"role": "user", "content": user_prompt})
@@ -163,12 +165,10 @@ elif st.session_state.page == "chat_interface":
 
                 # --- DYNAMIC QUESTION PROCESSING ENGINE ---
                 else:
-                    # Clean up input text to find the main subject matter
                     display_topic = user_prompt.replace("solve", "").replace("Solve", "").replace("what is", "").replace("What is", "").strip("?.! ")
                     if not display_topic:
                         display_topic = "your query"
 
-                    # Look for any numbers or math symbols in their input to customize equations
                     math_numbers = re.findall(r'\d+', clean_prompt)
                     num1 = math_numbers[0] if len(math_numbers) > 0 else "5"
                     num2 = math_numbers[1] if len(math_numbers) > 1 else "2"
@@ -195,3 +195,6 @@ elif st.session_state.page == "chat_interface":
                                 f"### 📚 **Tutorial Guide: {display_topic}**\n\n"
                                 f"**Step 1:** Diye gaye topic `{display_topic}` ke core elements aur variables ko closely identify karein.\n\n"
                                 f"**Step 2:** Is topic ke important values ko mathematical structure me fit karein (Jaise: $x = {num1}, y = {num2}$).\n\n"
+                                f"**💡 Hint:** Direct copy-paste karne ke bajaye, variables ke relation ko analyze karein aur step-by-step form use karke calculate karein!"
+                            )
+                        else:
